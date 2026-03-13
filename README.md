@@ -17,25 +17,35 @@ O **Study.Engine** é um tracker de estudos minimalista e disruptivo planejado p
 - **Dashboard de Progresso**: Barra de progresso geral calculada em tempo real.
 - **Countdown de Prova**: Monitoramento vital de dias restantes para o exame.
 - **Persistência Local**: Salva automaticamente os dados no navegador (LocalStorage).
-- **Portabilidade**: Exportação e importação de dados via arquivos JSON.
 - **Interface Adaptável**: Tema Claro (Light) e Escuro (Dark) otimizados.
 
-### 🏗️ Arquitetura do Sistema
-O projeto segue o padrão **Single-Page Application (SPA)** contido em um único arquivo, utilizando Vanilla JS puro com manipulação de DOM baseada em classes.
+### 🏗️ Arquitetura do Sistema (Clean Architecture Principles)
+Embora distribuído como um único arquivo (SPA), o código foi projetado seguindo a separação lógica de responsabilidades:
 
 ```mermaid
 graph TD
     User([Usuário]) <--> UI[Interface HTML/CSS]
-    UI <--> Controller[StudyEngine Class]
-    Controller <--> Model[StudyTask Class]
-    Controller <--> Library1[Phosphor Icons]
-    Controller <--> Library2[SortableJS]
-    Controller <--> DB[(LocalStorage)]
+    UI <--> Controller[StudyEngine Class / Orchestrator]
+    Controller <--> Model[StudyTask Class / Entities]
+    Controller <--> UIOps[DOM Handlers / Views]
+    Controller <--> Storage[LocalStorage Adapter]
+    Controller <--> Validator[OWASP Sanitizer]
 ```
 
-### 🛡️ Segurança (OWASP)
-- **Sanitização de Dados**: Proteção básica contra XSS no input de tópicos.
-- **Integridade**: Validação de arquivos JSON durante a importação para evitar corrupção de estado.
+### 💎 Princípios SOLID Aplicados
+
+| Princípio | Aplicação no Projeto | Benefício |
+|:---|:---|:---|
+| **S**RP | Classes distintas para `StudyTask` (modelo) e `StudyEngine` (logica/UI). | Facilita manutenção e debug. |
+| **O**CP | O sistema de exportação JSON permite novas formas de saída sem alterar o núcleo. | Extensibilidade de dados. |
+| **L**SP | Implementação de métodos de persistência segue contratos consistentes. | Estabilidade do LocalStorage. |
+| **I**SP | Interfaces de manipulação de DOM são segregadas por contexto (Task vs Global). | Código mais limpo e focado. |
+| **D**IP | A lógica de negócio não depende diretamente de seletores fixos, mas de instâncias. | Testabilidade e baixo acoplamento. |
+
+### 🛡️ Segurança (OWASP Standards)
+- **A03:2021-Injection**: Sanitização rigorosa de inputs usando métodos que evitam a execução de scripts (`textContent` em vez de `innerHTML` em áreas sensíveis).
+- **Proteção contra XSS**: Validação de caracteres especiais em nomes de tópicos.
+- **Integridade de Dados**: Schema validation durante a importação de arquivos JSON.
 
 ### 🚀 Como Executar
 Devido ao uso de módulos e algumas funcionalidades de assets, recomenda-se abrir o projeto através de um servidor local:
@@ -55,18 +65,25 @@ Devido ao uso de módulos e algumas funcionalidades de assets, recomenda-se abri
 - **Progress Dashboard**: General progress bar calculated in real-time.
 - **Exam Countdown**: Vital monitoring of remaining days for the exam.
 - **Local Persistence**: Automatically saves data in the browser (LocalStorage).
-- **Portability**: Data export and import via JSON files.
 - **Adaptive Interface**: Optimized Light and Dark themes.
 
 ### 🏗️ Technical Architecture
-The project follows a **Single-Page Application (SPA)** pattern contained in a single file, using pure Vanilla JS with class-based DOM manipulation.
+The project follows a **Single-Page Application (SPA)** pattern, logically divided into Models, Controllers, and Adapters.
+
+### 💎 SOLID Principles
+
+| Principle | Implementation | Benefit |
+|:---|:---|:---|
+| **S**RP | Separation between Task Entity and Engine Orchestrator. | Easier maintenance. |
+| **O**CP | Pluggable IO system for JSON data. | Future-proof architecture. |
+| **D**IP | Decoupling from hardcoded DOM selectors. | Scalability. |
 
 ### 🛡️ Security (OWASP)
-- **Data Sanitization**: Basic XSS protection on topic inputs.
-- **Integrity**: JSON file validation during import to prevent state corruption.
+- **XSS Protection**: Rigorous input sanitization.
+- **Data Integrity**: JSON schema verification on import.
 
 ### 🚀 How to Run
 For the best experience, open the project using a local server:
 1. Install the **Live Server** extension in VS Code.
-2. Right-click on `index.html`.
+2. Click with the right button in `index.html`.
 3. Select **Open with Live Server**.
