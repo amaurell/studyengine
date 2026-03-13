@@ -1,5 +1,7 @@
 # Study.Engine | Tracker
 
+![Screenshot do Projeto](screenshot.png)
+
 | Language | Document |
 |:---|:---|
 | 🇧🇷 Português | [Leia abaixo](#-sobre-o-projeto) |
