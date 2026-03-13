@@ -1,0 +1,976 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Study.Engine | Tracker</title>
+    <link rel="icon" type="image/svg+xml" href="rocket.svg" />
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+        :root {
+            --background: 0 0% 100%;
+            --foreground: 222.2 84% 4.9%;
+            --card: 0 0% 100%;
+            --card-foreground: 222.2 84% 4.9%;
+            --popover: 0 0% 100%;
+            --popover-foreground: 222.2 84% 4.9%;
+            --primary: 222.2 47.4% 11.2%;
+            --primary-foreground: 210 40% 98%;
+            --secondary: 210 40% 96.1%;
+            --secondary-foreground: 222.2 47.4% 11.2%;
+            --muted: 210 40% 96.1%;
+            --muted-foreground: 215.4 16.3% 46.9%;
+            --accent: 210 40% 96.1%;
+            --accent-foreground: 222.2 47.4% 11.2%;
+            --destructive: 0 84.2% 60.2%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 214.3 31.8% 91.4%;
+            --input: 214.3 31.8% 91.4%;
+            --ring: 222.2 84% 4.9%;
+            --radius: 0.5rem;
+        }
+
+        .dark {
+            --background: 224 71% 4%;
+            /* #0c0e17 - Deep Indigo/Black */
+            --foreground: 210 40% 98%;
+            --card: 224 71% 4%;
+            --card-foreground: 210 40% 98%;
+            --popover: 224 71% 4%;
+            --popover-foreground: 210 40% 98%;
+            --primary: 271 91% 65%;
+            /* #a855f7 - Purple */
+            --primary-foreground: 210 40% 98%;
+            --secondary: 217.2 32.6% 17.5%;
+            --secondary-foreground: 210 40% 98%;
+            --muted: 215 25% 27%;
+            --muted-foreground: 215 16% 47%;
+            /* #64748b - Slate */
+            --accent: 215 25% 27%;
+            --accent-foreground: 210 40% 98%;
+            --destructive: 0 62.8% 30.6%;
+            --destructive-foreground: 210 40% 98%;
+            --border: 215 25% 15%;
+            /* #1e293b - Subtle Dividers */
+            --input: 215 25% 15%;
+            --ring: 271 91% 65%;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            border-color: hsl(var(--border));
+        }
+
+        body {
+            background-color: hsl(var(--background));
+            color: hsl(var(--foreground));
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            padding: 4rem 2rem;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1550px;
+        }
+
+        header {
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.05em;
+            margin-bottom: 0.5rem;
+        }
+
+        .subtitle {
+            color: hsl(var(--muted-foreground));
+            font-size: 1rem;
+        }
+
+        /* SHADCN Progress */
+        .progress-card {
+            background-color: hsl(var(--card));
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            padding: 1.65rem;
+            /* Increased padding (approx 10%) */
+            margin-bottom: 2rem;
+            box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .progress-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .progress-percent {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .progress-track {
+            height: 0.75rem;
+            background-color: hsl(var(--secondary));
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background-color: hsl(var(--primary));
+            width: 0%;
+            transition: all 0.5s ease;
+        }
+
+        /* SHADCN Controls */
+        .toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .search-wrap {
+            position: relative;
+            flex: 1;
+            max-width: 400px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: hsl(var(--muted-foreground));
+            font-size: 1rem;
+        }
+
+        .search-input {
+            width: 100%;
+            background-color: transparent;
+            border: 1px solid hsl(var(--input));
+            border-radius: var(--radius);
+            padding: 0.5rem 0.5rem 0.5rem 2.25rem;
+            font-size: 0.875rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-input:focus {
+            border-color: hsl(var(--ring));
+        }
+
+        .actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius);
+            font-size: 0.875rem;
+            font-weight: 500;
+            height: 2.25rem;
+            padding: 0 1rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+            border: 1px solid transparent;
+        }
+
+        .btn-primary {
+            background-color: hsl(var(--primary));
+            color: hsl(var(--primary-foreground));
+        }
+
+        .btn-secondary {
+            background-color: hsl(var(--secondary));
+            color: hsl(var(--secondary-foreground));
+        }
+
+        .btn-outline {
+            border: 1px solid hsl(var(--border));
+            background-color: transparent;
+            color: hsl(var(--foreground));
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* SHADCN Table */
+        .table-wrap {
+            border: 1px solid hsl(var(--border));
+            border-radius: var(--radius);
+            overflow: hidden;
+        }
+
+        .table-scroll {
+            overflow: hidden;
+            /* Retired horizontal scroll */
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.875rem;
+        }
+
+        th {
+            background-color: transparent;
+            padding: 1.25rem 0.05rem;
+            /* Reduced horizontal spacing */
+            text-align: center;
+            font-weight: 700;
+            color: hsl(var(--muted-foreground));
+            border-bottom: 1px solid hsl(var(--border));
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        th:first-child {
+            text-align: left;
+            padding-left: 1rem;
+            position: sticky;
+            left: 0;
+            background-color: hsl(var(--background));
+            z-index: 10;
+            border-right: 1px solid hsl(var(--border));
+            /* Header divider */
+        }
+
+        td {
+            padding: 1.25rem 0.05rem;
+            /* Tighter padding */
+            border-bottom: 1px solid hsl(var(--border));
+            text-align: center;
+            min-width: 22px;
+            /* Denser columns */
+        }
+
+        td:first-child {
+            text-align: left;
+            padding-left: 1rem;
+            font-weight: 700;
+            color: hsl(var(--foreground));
+            /* Dynamic color for accessibility */
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            position: sticky;
+            left: 0;
+            background-color: hsl(var(--background));
+            z-index: 10;
+            border-right: 1px solid hsl(var(--border));
+            /* Vertical divider added back */
+            min-width: 450px;
+            width: auto;
+        }
+
+        /* Specific override for Light Mode Subject color if dynamic var is not enough */
+        body.light td:first-child {
+            color: #0c0e17;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* SHADCN Radio - Round */
+        .round-radio {
+            appearance: none;
+            width: 1rem;
+            /* Slightly smaller to fit better */
+            height: 1rem;
+            border: 2px solid #4b5563;
+            /* Dark gray border */
+            border-radius: 50%;
+            /* Rounded */
+            cursor: pointer;
+            position: relative;
+            background-color: transparent;
+            transition: all 0.2s;
+        }
+
+        .round-radio:checked {
+            background-color: #a855f7;
+            /* Vibrant Purple */
+            border-color: #a855f7;
+            box-shadow: 0 0 10px rgba(168, 85, 247, 0.5);
+            /* Purple Glow */
+        }
+
+        /* Checkbox-specific styling to keep the dot */
+        input[type="checkbox"].round-radio:checked::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0.35rem;
+            height: 0.35rem;
+            background-color: #ffffff;
+            border-radius: 50%;
+        }
+
+        .round-radio:focus {
+            outline: 2px solid hsl(var(--ring));
+            outline-offset: 2px;
+        }
+
+        /* Actions - Centered and Spaced like image */
+        .icons {
+            display: flex;
+            gap: 1.25rem;
+            /* Increased spacing */
+            justify-content: center;
+            /* Centered under header */
+            align-items: center;
+        }
+
+        .icon-btn {
+            color: hsl(var(--muted-foreground));
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 0.25rem;
+            border-radius: var(--radius);
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .icon-btn:hover {
+            color: hsl(var(--foreground));
+            background-color: hsl(var(--accent));
+        }
+
+        /* Modal SHADCN */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background-color: rgb(0 0 0 / 0.8);
+            backdrop-filter: blur(4px);
+            display: grid;
+            place-items: center;
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .modal-content {
+            background-color: hsl(var(--background));
+            border: 1px solid hsl(var(--border));
+            padding: 1.5rem;
+            border-radius: var(--radius);
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 10px 15px -3px rgb(0 0 0 / 0.1);
+        }
+
+        .modal-content h2 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .modal-input {
+            width: 100%;
+            background-color: transparent;
+            color: hsl(var(--foreground));
+            border: 1px solid hsl(var(--input));
+            border-radius: var(--radius);
+            padding: 0.5rem;
+            margin-bottom: 1rem;
+            outline: none;
+            font-size: 0.875rem;
+        }
+
+        .modal-input::placeholder {
+            color: hsl(var(--muted-foreground));
+            opacity: 0.7;
+        }
+
+        .modal-btns {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.5rem;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Switch Styles */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: hsl(var(--muted));
+            transition: .4s;
+            border-radius: 34px;
+            border: 1px solid hsl(var(--border));
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 2px;
+            bottom: 2px;
+            background-color: hsl(var(--foreground));
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked+.slider {
+            background-color: hsl(var(--primary));
+        }
+
+        input:checked+.slider:before {
+            transform: translateX(20px);
+            background-color: hsl(var(--primary-foreground));
+        }
+
+        .drag-handle {
+            cursor: grab;
+            color: hsl(var(--muted-foreground));
+            padding-right: 0.5rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .drag-handle:active {
+            cursor: grabbing;
+        }
+
+        .sortable-ghost {
+            opacity: 0.4;
+            background: hsl(var(--muted));
+        }
+
+        /* Custom Action Buttons Styling - Hollow/Adaptive */
+        .actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .btn-action {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            font-size: 1.25rem;
+            border: 2px solid;
+            font-family: inherit;
+        }
+
+        /* LIGHT MODE COLORS */
+        body.light .btn-add {
+            border-color: #6366f1;
+            color: #6366f1;
+        }
+
+        body.light .btn-export {
+            border-color: #3b82f6;
+            color: #3b82f6;
+        }
+
+        body.light .btn-import {
+            border-color: #10b981;
+            color: #10b981;
+        }
+
+        body.light .btn-clear {
+            border-color: #ef4444;
+            color: #ef4444;
+        }
+
+        /* DARK MODE COLORS */
+        body.dark .btn-add {
+            border-color: #a78bfa;
+            color: #a78bfa;
+            box-shadow: 0 0 10px rgba(167, 139, 250, 0.2);
+        }
+
+        body.dark .btn-export {
+            border-color: #60a5fa;
+            color: #60a5fa;
+            box-shadow: 0 0 10px rgba(96, 165, 250, 0.2);
+        }
+
+        body.dark .btn-import {
+            border-color: #34d399;
+            color: #34d399;
+            box-shadow: 0 0 10px rgba(52, 211, 153, 0.2);
+        }
+
+        body.dark .btn-clear {
+            border-color: #f87171;
+            color: #f87171;
+            box-shadow: 0 0 10px rgba(248, 113, 113, 0.2);
+        }
+
+        .btn-action:hover {
+            opacity: 0.8;
+            transform: translateY(-2px);
+        }
+
+        .btn-clear {
+            width: auto;
+            padding: 0 1.25rem;
+            gap: 8px;
+            font-weight: 500;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+
+<body class="light">
+    <main class="container">
+        <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+            <div>
+                <h1>Tracker de Estudos</h1>
+                <p class="subtitle">Organize seu aprendizado. Monitore seu progresso diário.</p>
+            </div>
+
+            <!-- Exam Countdown - Centralized with Thin Orange Border -->
+            <div id="examContainer"
+                style="display: flex; align-items: center; gap: 1.25rem; background: hsl(var(--muted)/0.3); padding: 0.7rem 1.25rem; border-radius: var(--radius); border: 1px solid #f97316; height: fit-content; margin: 0 auto;">
+                <div style="display: flex; flex-direction: column;">
+                    <span
+                        style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: hsl(var(--muted-foreground)); letter-spacing: 0.05em;">Data
+                        da Prova</span>
+                    <input type="date" id="examDateInput"
+                        style="background: transparent; border: none; color: hsl(var(--foreground)); font-size: 1rem; font-weight: 700; outline: none; cursor: pointer; color-scheme: dark;">
+                </div>
+                <div style="width: 1px; height: 32px; background: #f97316; opacity: 0.5;"></div>
+                <div style="display: flex; flex-direction: column; align-items: center; min-width: 75px;">
+                    <span id="daysLeftLabel"
+                        style="font-size: 0.75rem; text-transform: uppercase; font-weight: 700; color: hsl(var(--muted-foreground)); letter-spacing: 0.05em;">Faltam</span>
+                    <span id="daysLeftCount" style="font-size: 1.35rem; font-weight: 800; color: #f97316;">--</span>
+                </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+                <span style="font-size: 0.8rem; font-weight: 500;">Dark Mode</span>
+                <label class="switch">
+                    <input type="checkbox" id="themeSwitch">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </header>
+
+        <section class="progress-card">
+            <div class="progress-header">
+                <span class="progress-label">Progresso Geral</span>
+                <span class="progress-percent" id="progressVal">0%</span>
+            </div>
+            <div class="progress-track">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+        </section>
+
+        <nav class="toolbar">
+            <div class="search-wrap">
+                <i class="ph ph-magnifying-glass search-icon"></i>
+                <input type="text" id="searchInput" class="search-input" placeholder="Pesquisar assuntos...">
+            </div>
+            <div class="actions">
+                <button class="btn-action btn-add" id="addBtn" title="Novo Tópico">
+                    <i class="ph ph-plus-circle"></i>
+                </button>
+                <button class="btn-action btn-export" id="exportBtn" title="Exportar">
+                    <i class="ph ph-export"></i>
+                </button>
+                <button class="btn-action btn-import" id="importBtn" title="Importar">
+                    <i class="ph ph-download-simple"></i>
+                </button>
+                <input type="file" id="importFile" class="hidden" accept=".json">
+                <button class="btn-action btn-clear" id="clearBtn">
+                    <i class="ph ph-trash"></i>
+                    Limpar
+                </button>
+            </div>
+        </nav>
+
+        <section class="table-wrap">
+            <div class="table-scroll">
+                <table id="dataTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 450px;">O QUE ESTUDAR</th>
+                            <script>
+                                for (let i = 1; i <= 31; i++) {
+                                    document.write(`<th>${String(i).padStart(2, '0')}</th>`);
+                                }
+                            </script>
+                            <th style="width: 100px;">AÇÕES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody"></tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <div class="modal-overlay" id="taskModal">
+        <div class="modal-content">
+            <h2 id="modalTitle">Novo Tópico</h2>
+            <input type="text" id="taskInput" class="modal-input" placeholder="Título do assunto...">
+            <div class="modal-btns">
+                <button class="btn btn-outline" id="cancelModalBtn">Cancelar</button>
+                <button class="btn btn-primary" id="saveModalBtn">Salvar</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        class StudyTask {
+            constructor(id, title, days = {}) {
+                this.id = id || Date.now();
+                this.title = title;
+                this.days = days;
+            }
+            toggleDay(day) {
+                if (this.days[day]) delete this.days[day];
+                else this.days[day] = true;
+            }
+        }
+
+        class StudyEngine {
+            constructor() {
+                this.tasks = [];
+                this.nodes = {
+                    tableBody: document.getElementById('tableBody'),
+                    progressVal: document.getElementById('progressVal'),
+                    progressBar: document.getElementById('progressBar'),
+                    searchInput: document.getElementById('searchInput'),
+                    addBtn: document.getElementById('addBtn'),
+                    modal: document.getElementById('taskModal'),
+                    modalTitle: document.getElementById('modalTitle'),
+                    taskInput: document.getElementById('taskInput'),
+                    saveBtn: document.getElementById('saveModalBtn'),
+                    cancelBtn: document.getElementById('cancelModalBtn'),
+                    exportBtn: document.getElementById('exportBtn'),
+                    importBtn: document.getElementById('importBtn'),
+                    importFile: document.getElementById('importFile'),
+                    clearBtn: document.getElementById('clearBtn'),
+                    examDateInput: document.getElementById('examDateInput'),
+                    daysLeftCount: document.getElementById('daysLeftCount'),
+                    daysLeftLabel: document.getElementById('daysLeftLabel')
+                };
+                this.sorting = null;
+                this.editingId = null;
+                this.init();
+            }
+
+            init() {
+                this.load();
+                this.initTheme();
+                this.initExamCountdown();
+                this.bindEvents();
+                this.initSortable();
+                this.render();
+            }
+
+            initExamCountdown() {
+                const savedDate = localStorage.getItem('study-exam-date');
+                if (savedDate) {
+                    this.nodes.examDateInput.value = savedDate;
+                    this.updateCountdown();
+                }
+
+                this.nodes.examDateInput.onchange = (e) => {
+                    localStorage.setItem('study-exam-date', e.target.value);
+                    this.updateCountdown();
+                };
+            }
+
+            updateCountdown() {
+                const examDateStr = this.nodes.examDateInput.value;
+                if (!examDateStr) {
+                    this.nodes.daysLeftCount.textContent = "--";
+                    return;
+                }
+
+                const examDate = new Date(examDateStr + 'T00:00:00');
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+
+                const diffTime = examDate.getTime() - today.getTime();
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+                if (diffDays < 0) {
+                    this.nodes.daysLeftCount.textContent = "0";
+                    this.nodes.daysLeftLabel.textContent = "Passou";
+                    this.nodes.daysLeftCount.style.color = "#ef4444";
+                } else {
+                    this.nodes.daysLeftCount.textContent = diffDays;
+                    this.nodes.daysLeftLabel.textContent = "Faltam";
+                    this.nodes.daysLeftCount.style.color = "#a855f7";
+                }
+            }
+
+            initTheme() {
+                const saved = localStorage.getItem('study-theme') || 'light';
+                const switchEl = document.getElementById('themeSwitch');
+                if (saved === 'dark') {
+                    document.body.classList.replace('light', 'dark');
+                    switchEl.checked = true;
+                }
+                switchEl.onchange = (e) => {
+                    const isDark = e.target.checked;
+                    document.body.classList.replace(isDark ? 'light' : 'dark', isDark ? 'dark' : 'light');
+                    localStorage.setItem('study-theme', isDark ? 'dark' : 'light');
+                };
+            }
+
+            initSortable() {
+                this.sorting = new Sortable(this.nodes.tableBody, {
+                    handle: '.drag-handle',
+                    animation: 150,
+                    ghostClass: 'sortable-ghost',
+                    onEnd: () => {
+                        this.reorderTasks();
+                    }
+                });
+            }
+
+            reorderTasks() {
+                const rows = Array.from(this.nodes.tableBody.querySelectorAll('tr'));
+                const newTasks = rows.map(row => {
+                    const id = parseInt(row.dataset.id);
+                    return this.tasks.find(t => t.id === id);
+                });
+                this.tasks = newTasks;
+                this.save();
+            }
+
+            bindEvents() {
+                this.nodes.addBtn.onclick = () => this.openModal();
+                this.nodes.cancelBtn.onclick = () => this.closeModal();
+                this.nodes.saveBtn.onclick = () => this.handleSave();
+                this.nodes.searchInput.oninput = (e) => this.render(e.target.value);
+                this.nodes.exportBtn.onclick = () => this.export();
+                this.nodes.importBtn.onclick = () => this.nodes.importFile.click();
+                this.nodes.importFile.onchange = (e) => this.import(e);
+                this.nodes.clearBtn.onclick = () => this.clearAll();
+            }
+
+            clearAll() {
+                if (confirm("Deseja limpar todos os dados?")) {
+                    this.tasks = [];
+                    this.save();
+                    this.render();
+                }
+            }
+
+            load() {
+                try {
+                    const data = localStorage.getItem('study-data-shadcn');
+                    if (data) {
+                        const parsed = JSON.parse(data);
+                        this.tasks = parsed.map(t => new StudyTask(t.id, t.title, t.days));
+                    }
+                } catch (e) { this.tasks = []; }
+            }
+
+            save() {
+                localStorage.setItem('study-data-shadcn', JSON.stringify(this.tasks));
+                this.updateProgress();
+            }
+
+            openModal(id = null) {
+                this.editingId = id;
+                if (id) {
+                    this.nodes.taskInput.value = this.tasks.find(t => t.id === id).title;
+                    this.nodes.modalTitle.textContent = "Editar Tópico";
+                } else {
+                    this.nodes.taskInput.value = "";
+                    this.nodes.modalTitle.textContent = "Novo Tópico";
+                }
+                this.nodes.modal.classList.add('active');
+                this.nodes.taskInput.focus();
+            }
+
+            closeModal() { this.nodes.modal.classList.remove('active'); }
+
+            handleSave() {
+                const title = this.nodes.taskInput.value.trim();
+                if (!title) return;
+                if (this.editingId) {
+                    const task = this.tasks.find(t => t.id === this.editingId);
+                    if (task) task.title = title;
+                }
+                else this.tasks.push(new StudyTask(null, title));
+                this.save();
+                this.closeModal();
+                this.render(this.nodes.searchInput.value);
+            }
+
+            deleteTask(id) {
+                if (confirm("Deseja realmente excluir?")) {
+                    this.tasks = this.tasks.filter(t => t.id !== id);
+                    this.save();
+                    this.render();
+                }
+            }
+
+            render(filter = "") {
+                this.nodes.tableBody.innerHTML = "";
+                this.tasks.filter(t => t.title.toLowerCase().includes(filter.toLowerCase()))
+                    .forEach(task => {
+                        const tr = document.createElement('tr');
+                        tr.dataset.id = task.id;
+                        const tdName = document.createElement('td');
+                        
+                        const nameDiv = document.createElement('div');
+                        nameDiv.style.display = 'flex';
+                        nameDiv.style.alignItems = 'center';
+                        
+                        const handle = document.createElement('span');
+                        handle.className = 'drag-handle';
+                        handle.innerHTML = '<i class="ph ph-dots-six-vertical"></i>';
+                        
+                        const titleText = document.createElement('span');
+                        titleText.textContent = task.title;
+                        
+                        nameDiv.appendChild(handle);
+                        nameDiv.appendChild(titleText);
+                        tdName.appendChild(nameDiv);
+                        tr.appendChild(tdName);
+
+                        for (let i = 1; i <= 31; i++) {
+                            const td = document.createElement('td');
+                            const checkbox = document.createElement('input');
+                            checkbox.type = 'checkbox';
+                            checkbox.className = 'round-radio';
+                            checkbox.checked = !!task.days[i];
+                            checkbox.onclick = (e) => {
+                                task.toggleDay(i);
+                                checkbox.checked = !!task.days[i];
+                                this.save();
+                                // No full re-render needed for toggle
+                                this.updateProgress();
+                            };
+                            td.appendChild(checkbox);
+                            tr.appendChild(td);
+                        }
+
+                        const tdActions = document.createElement('td');
+                        const actionsDiv = document.createElement('div');
+                        actionsDiv.className = 'icons';
+
+                        const editBtn = document.createElement('button');
+                        editBtn.className = 'icon-btn';
+                        editBtn.setAttribute('aria-label', 'Editar tópico');
+                        editBtn.innerHTML = '<i class="ph ph-pencil-simple"></i>';
+                        editBtn.onclick = () => this.openModal(task.id);
+
+                        const delBtn = document.createElement('button');
+                        delBtn.className = 'icon-btn';
+                        delBtn.setAttribute('aria-label', 'Excluir tópico');
+                        delBtn.innerHTML = '<i class="ph ph-trash"></i>';
+                        delBtn.onclick = () => this.deleteTask(task.id);
+
+                        actionsDiv.append(editBtn, delBtn);
+                        tdActions.appendChild(actionsDiv);
+                        tr.appendChild(tdActions);
+                        this.nodes.tableBody.appendChild(tr);
+                    });
+                this.updateProgress();
+            }
+
+            updateProgress() {
+                if (this.tasks.length === 0) {
+                    this.nodes.progressVal.textContent = "0%";
+                    this.nodes.progressBar.style.width = "0%";
+                    return;
+                }
+                const total = this.tasks.length * 31;
+                const completed = this.tasks.reduce((acc, t) => acc + Object.keys(t.days).length, 0);
+                const percent = Math.round((completed / total) * 100);
+                this.nodes.progressVal.textContent = percent + "%";
+                this.nodes.progressBar.style.width = percent + "%";
+            }
+
+            export() {
+                const data = JSON.stringify(this.tasks);
+                const blob = new Blob([data], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'study-engine-shadcn.json';
+                a.click();
+            }
+
+            import(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const imported = JSON.parse(event.target.result);
+                        this.tasks = imported.map(t => new StudyTask(t.id, t.title, t.days));
+                        this.save();
+                        this.render();
+                    } catch (e) { alert("Erro ao importar."); }
+                };
+                reader.readAsText(file);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => { window.Engine = new StudyEngine(); });
+    </script>
+</body>
+
+</html>
